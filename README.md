@@ -50,7 +50,7 @@ The skill is strong enough to be convincingly wrong. Forcing the model to articu
 
 ### In Zaguán Blade
 
-This skill is integrated into [Zaguán Blade](https://zaguan.ai) and can be loaded via the `load_skill` tool with `skill_id: security-audit`.
+This skill is integrated into [Zaguán Blade](https://zblade.dev/) and can be loaded via the `load_skill` tool with `skill_id: security-audit`.
 
 ### Standalone
 
@@ -91,7 +91,7 @@ Issues, feedback, and contributions are welcome. Areas of particular interest:
 
 ## Blog Post
 
-Read the [design reasoning blog post](https://zaguan.ai/blog/2026-04-11-security-audit-skill-in-the-llm-age) for the full story of why each decision was made.
+Read the [design reasoning blog post](https://zblade.dev/blog/2026-04-11-security-audit-skill-in-the-llm-age/) for the full story of why each decision was made.
 
 ## License
 

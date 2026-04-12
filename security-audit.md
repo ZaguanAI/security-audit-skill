@@ -377,9 +377,23 @@ Adapt your audit to the actual stack. For example:
 - Rust: `unsafe` blocks, FFI boundaries, panic behavior in critical sections, unchecked arithmetic assumptions
 - PHP, Ruby, and other dynamic stacks: unsafe loaders, reflection, type juggling, dynamic dispatch, template injection, or unserialization equivalents
 
+#### Intersection Probing
+
+After completing the category-by-category audit, check the seams between categories. The most dangerous bugs often live where two independently-valid subsystems interact incorrectly.
+
+Identify 2–3 high-risk intersections relevant to this system and trace one concrete flow across each. Common intersection patterns:
+- **Auth + Concurrency**: race windows during token rotation, session creation, or permission changes
+- **Parsing + Authorization**: input normalized differently by parser vs. auth layer, creating a semantic gap
+- **State machines + Deserialization**: partially deserialized objects leaving state machines in undefined transitions
+- **Error handling + Crypto**: failed crypto operations that leak state or fail open
+- **AI tooling + Supply chain**: poisoned model updates or tool definitions that change authorization behavior
+- **Caching + Authorization**: cached responses served under different auth context than original request
+
+If no high-risk intersections are found, state this explicitly. Do not fabricate intersections.
+
 #### Phase 3 Exit Criteria
 
-You have examined the categories most relevant to the detected stack and threat model. If context limits prevent full coverage, explicitly state which categories were deprioritized and why.
+You have examined the categories most relevant to the detected stack and threat model, and probed the intersections between them. If context limits prevent full coverage, explicitly state which categories were deprioritized and why.
 
 ## Evidence Standard
 
@@ -528,6 +542,7 @@ Inside `<security_scratchpad>`, you must:
 - play **Devil’s Advocate** against your own hypothesis by checking whether middleware, framework defaults, validators, ORM parameterization, proxy rules, auth libraries, or other existing controls neutralize the issue
 - evaluate **Exploit Chaining**: can multiple low-severity issues, abuse primitives, or hardening gaps be combined to achieve a critical outcome (like a sandbox escape)?
 - explicitly state: **"What would prove me wrong?"** to challenge your own conclusion
+- identify the **key assumption** that, if wrong, would invalidate this audit's conclusions (e.g., "this audit assumes config files are not modified by remote sync; if they are, several Design Property classifications would flip to Confirmed Finding")
 - conclude with **exact classification** (Confirmed finding / Likely risk / Abuse primitive / Hardening opportunity / Design property (by design) / Informational / False positive) and **severity** only if it is a Confirmed finding
 - note what key facts are still missing, if any
 

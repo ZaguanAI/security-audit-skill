@@ -181,7 +181,7 @@ For each candidate issue, you can describe the path from untrusted input to boun
 
 ### Phase 3: Audit High-Risk Zones
 
-Audit the categories most relevant to the actual stack and threat model.
+Audit the categories most relevant to the actual stack and threat model. Phase 3 is a guide, not a checklist — depth in relevant areas is more valuable than shallow coverage of all categories.
 
 #### Access Control
 
@@ -389,7 +389,7 @@ Identify 2–3 high-risk intersections relevant to this system and trace one con
 - **AI tooling + Supply chain**: poisoned model updates or tool definitions that change authorization behavior
 - **Caching + Authorization**: cached responses served under different auth context than original request
 
-If no high-risk intersections are found, state this explicitly. Do not fabricate intersections.
+If no high-risk intersections are found, or no concrete cross-boundary flow can be traced, state this explicitly. Do not fabricate intersections or infer flows to satisfy this step.
 
 #### Phase 3 Exit Criteria
 
@@ -475,7 +475,7 @@ For each finding, note attack complexity:
 - **Easy** — exploitable with a single crafted request and no special access or knowledge
 - **Moderate** — requires basic authentication or modest reconnaissance
 - **Hard** — requires specific preconditions, timing, or chained steps
-- **Expert** — requires privileged access, narrow race windows, or deep internal knowledge
+- **Complex** — requires privileged access, narrow race windows, or deep internal knowledge
 
 ## Audit Depth Modes
 
@@ -540,7 +540,7 @@ Inside `<security_scratchpad>`, you must:
 - state the attacker capability before and after, and decide whether exploit value is actually positive
 - formulate a hypothesis for each candidate issue
 - play **Devil’s Advocate** against your own hypothesis by checking whether middleware, framework defaults, validators, ORM parameterization, proxy rules, auth libraries, or other existing controls neutralize the issue
-- evaluate **Exploit Chaining**: can multiple low-severity issues, abuse primitives, or hardening gaps be combined to achieve a critical outcome (like a sandbox escape)?
+- evaluate **Exploit Chaining**: can multiple low-severity issues, abuse primitives, or hardening gaps be combined to achieve a critical outcome (like a sandbox escape)? Only consider chains where each step is grounded in an observed code path or confirmed behavior. Do not construct hypothetical chains from unverified assumptions.
 - explicitly state: **"What would prove me wrong?"** to challenge your own conclusion
 - identify the **key assumption** that, if wrong, would invalidate this audit's conclusions (e.g., "this audit assumes config files are not modified by remote sync; if they are, several Design Property classifications would flip to Confirmed Finding")
 - conclude with **exact classification** (Confirmed finding / Likely risk / Abuse primitive / Hardening opportunity / Design property (by design) / Informational / False positive) and **severity** only if it is a Confirmed finding
@@ -600,6 +600,7 @@ Use this structure when returning an audit:
 - Verification tools: [tools used]
 - Missing facts: [if any]
 - What would prove me wrong?: [challenge your own conclusion]
+- Key assumption: [the single assumption that would invalidate the conclusions]
 </security_scratchpad>
 
 ## Security Audit Summary

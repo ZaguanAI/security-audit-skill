@@ -417,6 +417,63 @@ Every finding should include:
 
 If you cannot explain the path end to end, downgrade the claim.
 
+## Enterprise Proof and Actionability Contract
+
+The audit is not complete when a weakness sounds plausible. A confirmed finding is valid only when a skeptical maintainer can reproduce it, trace it, and fix it without additional interpretation.
+
+### Confirmed Finding Gate
+
+Before classifying anything as a **Confirmed finding**, explicitly verify all of the following:
+- **Reproducible** — a concrete request, payload, file, event, configuration, user action, or sequence triggers the behavior.
+- **Traceable** — the path from input -> code path -> trust boundary -> sink or privileged effect is visible in the audited evidence.
+- **Actionable** — the remediation points to exact code locations or configuration controls and describes the specific logic change.
+- **Defensible** — the claim would survive review by a skeptical maintainer who asks "where is the proof?"
+
+If any item is missing, downgrade to **Likely risk**, **Abuse primitive**, **Hardening opportunity**, **Design property (by design)**, **Informational**, or **False positive**. Do not label it as confirmed.
+
+### Proof Gate Questions
+
+For each candidate confirmed finding, answer:
+1. What exact input, payload, request, event, file, configuration, or user action triggers the behavior?
+2. What exact code path is executed?
+3. What trust or authority boundary is crossed?
+4. What new capability, persistence, stealth, or scope does the attacker gain?
+5. What is the minimal safe reproduction or validation step?
+6. What exact code or configuration change would fix it?
+
+If any answer is incomplete, guessed, or dependent on an unverified assumption, do not report the issue as a confirmed finding.
+
+### Kill Conditions
+
+Discard a candidate finding from the final report if:
+- it requires more than one unverified assumption
+- the attacker gains no new capability, persistence, stealth, or scope
+- the issue depends on unclear deployment conditions that cannot be validated from available evidence
+- the exploit path cannot be traced end to end
+- the reproduction cannot be described concretely and safely
+- the fix cannot be localized beyond vague advice such as "sanitize input" or "validate data"
+
+Do not include discarded findings in the final report.
+
+### Chain Compression Rule
+
+When multiple weak signals appear related, do not report them as separate findings. Attempt to combine them into the smallest complete exploit chain that produces real impact.
+
+Only report the chain if every link is grounded in observed code, configuration, or verified behavior. If the chain cannot be completed, downgrade or discard the partial chain instead of reporting speculative fragments.
+
+### Confidence Threshold
+
+Only confirmed findings should carry **high confidence** or equivalent confidence >= 0.8. If confidence is lower, downgrade the item unless the user explicitly requested preliminary findings.
+
+### Enterprise Output Discipline
+
+Optimize for maximum confidence per finding, not coverage. Prefer one undeniable finding over five interesting possibilities.
+
+Final reports should emphasize:
+- confirmed findings with full proof
+- minimal likely risks only when tied to specific code locations and concrete confirmation steps
+- no speculative, exploratory, or generic checklist sections
+
 ## CWE Discipline
 
 - Do not attach a CWE merely because a dangerous API appears.
@@ -494,6 +551,12 @@ When you cannot access files, configs, or runtime details needed to confirm or r
 3. Lower confidence explicitly.
 4. Provide a concrete confirmation step the user can perform.
 5. Do not silently assume either the best case or the worst case.
+
+## Common Audit Rationalizations
+
+- "This looks dangerous enough to report" → Suspicion is not evidence. Trace the boundary crossing, sink, and impact.
+- "I found a scary API, that's enough" → A dangerous primitive without attacker reachability or exploit value is not yet a finding.
+- "I'll report the plausible chain even if one link is guessed" → Guessed exploit chains create false positives. Mark the missing fact and downgrade confidence instead.
 
 ## False-Positive Downgrade Heuristics
 
@@ -617,16 +680,18 @@ Use this structure when returning an audit:
 - **Location**: `path/to/file` -> `function_name()`
 - **Analogous CVEs**: [if applicable]
 - **Issue**: [what is wrong]
+- **Trigger Input**: [exact request, payload, file, event, configuration, user action, or sequence]
 - **Boundary**: [untrusted source -> trusted component -> protected effect]
 - **Attacker Capability Before**: [what they could already do]
 - **Attacker Capability After**: [what new power they gain]
 - **Exploit Value**: [capability gain + persistence + stealth + scope]
 - **Attack Path**: [untrusted input -> boundary -> sink -> impact]
 - **Preconditions**: [what must be true for this to work]
+- **Expected vs Actual Behavior**: [expected safe behavior vs observed vulnerable behavior]
 - **Impact**: [realistic consequence]
 - **Impact Ceiling**: [max plausible consequence in this trust model]
-- **Fix**: [specific code change or architectural mitigation, preferably with a concise code snippet when useful]
-- **Verification**: [how to confirm the fix]
+- **Fix**: [specific code or configuration change at exact locations; avoid vague advice]
+- **Verification**: [minimal safe reproduction before the fix and expected failing/pass condition after the fix]
 - **Confidence**: high | medium | low - [if not high, explain exactly what missing file, config, runtime fact, or possibly neutralizing framework control prevents full confidence]
 - **What would prove me wrong?**: [how the hypothesis could be falsified]
 
